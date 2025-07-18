@@ -1,14 +1,25 @@
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/cdev.h>
+#include <linux/uaccess.h>
 
-struct adxl_dev {
+struct spi_data {
 	struct cdev cdev;
-	char buffer[1024];
+	char data[1024];
 };
-
-struct adxl_dev *adxl_device;
 static struct file_operations adxl345_fops;
+static int adxl345_open(struct inode *inode, struct file *file)
+{
+	struct spi_data *adxl_device;
+	adxl_device = container_of(inode->i_cdev, struct spi_data, cdev)
+	file->private_data = adxl_device;
+	return 0;
+}
+ssize_t (*read) (struct file *, char __user *buffer, size_t count,loff_t *offset)
+{
+	
+}
+
 
 static const struct of_device_id adxl345_of_match[] = {
 	{ .compatible = "adi,adxl345"},
