@@ -2,6 +2,7 @@
 #include <linux/init.h>
 #include <linux/cdev.h>
 #include <linux/uaccess.h>
+#include <linux/spi/spi.h>
 
 struct spi_data {
 	struct cdev cdev;
@@ -15,9 +16,37 @@ static int adxl345_open(struct inode *inode, struct file *file)
 	file->private_data = adxl_device;
 	return 0;
 }
-ssize_t (*read) (struct file *, char __user *buffer, size_t count,loff_t *offset)
+ssize_t (*read) (struct file *, char __user *buf, size_t count,loff_t *offset)
 {
-	
+
+	struct spi_data *tldata = file->private_data;
+	struct spi_device *spi = tldata->spi;
+	u8 tx_buf[1]={ 0x80 | 0x40 | 0x32};
+	u8 rx_buf[6] = { 0 };
+
+	struct spi_message msg;
+	struct spi_transfer xfers[2] = { 0 };
+	int ret;
+
+	if (len < sizeof(rx_buf))
+		return -EINVAL;
+	spi_message_init(&msg);
+
+	xfers[0].tx_buf = tx_buf;
+	xfers[0].len = 1;
+
+	xfers[1].rx_buf = rx_buf;
+	xfers[1].len = 6;
+
+	spi_message_add_tail(&xfers[0], &msg);
+	spi_message_add_tail(&xfers[1], &msg);
+
+	ret = spi_sync(spi, &msg);
+	if (ret < 0)
+		return ret;
+	if(copy_to_user(buf, rx_buf, sizeof(rx_buf)))
+		return -EFAULT;
+	return sizeof(rx_buf);
 }
 
 
@@ -35,7 +64,7 @@ static struct spi_driver adxl345_spi_driver = {
 };
 static struct file_operations adxl345_fops = {
 	.owner = THIS_MODULE,
-	.open = adxl345_read,
+	.open = adxl345_open,
 	.read = adxl345_read,
 }
 
