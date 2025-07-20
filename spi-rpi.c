@@ -7,6 +7,9 @@
 struct spi_data {
 	struct cdev cdev;
 	char data[1024];
+	dev_t dev_num;
+	struct class *class;
+	struct device *device;
 };
 static struct file_operations adxl345_fops;
 static int adxl345_open(struct inode *inode, struct file *file)
@@ -49,6 +52,29 @@ ssize_t (*read) (struct file *, char __user *buf, size_t count,loff_t *offset)
 	return sizeof(rx_buf);
 }
 
+static int adxl345_probe(struct spi_device *spi)
+{
+	int ret;
+	struct spi_data *adxl_device;
+	adxl_device = kzalloc(sizeof(struct spi_data), GFP_KERNEL);
+	if(!adxl_device)
+		return -ENOMEM;
+	spi_set_drvdata(spi, adxl_device);
+	ret = alloc_chrdev_region(&adxl_device-> dev_t, 0, 1, "adxl345");
+	if (ret<0){
+		dev_err(,"alloc_chrdev failed\n");
+		}
+	cdev_init(&adxl_device->cdev, adxl345_fops);
+	adxl_device->cdev.owner = THIS_MODULE;
+	ret = cdev_add(&adxl_device->cdev, &adxl_device->dev_t ,1);
+	if (ret < 0){
+		dev_err(&spi->adxl_device,"cdev_add_failed\n");
+		unregister_chrdev_region(&adxl_device->devt, 1);
+		kfree(adxl_device);
+		return ret;
+	}
+
+}
 
 static const struct of_device_id adxl345_of_match[] = {
 	{ .compatible = "adi,adxl345"},
