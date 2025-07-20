@@ -72,8 +72,16 @@ static int adxl345_probe(struct spi_device *spi)
 		unregister_chrdev_region(&adxl_device->devt, 1);
 		kfree(adxl_device);
 		return ret;
-	}
 
+	//create class node
+	adxl_device->class = class_create(THIS_MODULE, "adxl345");
+	if (IS_ERR(adxl_device->class)){
+		ret = PTR_ERR(adxl_device)->class;
+		unregister_chrdev_region(&adxl_device->devt, 1);
+		return ret;
+	}
+	//create device node
+	adxl_device->device = device_create(adxl_device->class, NULL, adxl_device->dev_num, NULL);
 }
 
 static const struct of_device_id adxl345_of_match[] = {
