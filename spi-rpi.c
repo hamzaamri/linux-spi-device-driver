@@ -83,7 +83,14 @@ static int adxl345_probe(struct spi_device *spi)
 	//create device node
 	adxl_device->device = device_create(adxl_device->class, NULL, adxl_device->dev_num, NULL);
 }
-
+static int adxl345_remove(struct spi_device *spi){
+	struct spi_data *adxl_device = spi_get_drvdata(spi);
+	device_destroy(adxl_device->class, adxl_device->dev_t);
+	class_destroy(adxl_device->class);
+	cdev_del(&adxl_device->cdev);
+	unregister_chrdev_region(adxl_device->dev_t, 1);
+	kfree(adxl_device);
+}
 static const struct of_device_id adxl345_of_match[] = {
 	{ .compatible = "adi,adxl345"},
 	{ }
