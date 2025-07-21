@@ -1,1 +1,0 @@
-cmd_/home/hamza/modules/spi_driver/Module.symvers := sed 's/\.ko$$/\.o/' /home/hamza/modules/spi_driver/modules.order | scripts/mod/modpost -m -a  -o /home/hamza/modules/spi_driver/Module.symvers -e -i Module.symvers   -T -

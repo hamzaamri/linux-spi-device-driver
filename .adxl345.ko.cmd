@@ -1,1 +1,0 @@
-cmd_/home/hamza/modules/spi_driver/adxl345.ko := ld -r  -m elf_x86_64 -z noexecstack   --build-id=sha1  -T scripts/module.lds -o /home/hamza/modules/spi_driver/adxl345.ko /home/hamza/modules/spi_driver/adxl345.o /home/hamza/modules/spi_driver/adxl345.mod.o;  true
