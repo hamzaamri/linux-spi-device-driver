@@ -1,8 +1,6 @@
-adxl345.mod
-adxl345.mod.o
-Module.symvers            
-adxl345.ko
-adxl345.mod.c
-adxl345.o
+*.o
+*.ko
+*.mod*
 modules.order
+Module.symvers
 
